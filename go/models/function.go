@@ -21,6 +21,9 @@ type Function struct {
 	// name
 	Name string `json:"name,omitempty"`
 
+	// region
+	Region string `json:"region,omitempty"`
+
 	// sha
 	Sha string `json:"sha,omitempty"`
 }

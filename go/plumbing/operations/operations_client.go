@@ -29,13 +29,27 @@ type Client struct {
 type ClientService interface {
 	AddMemberToAccount(params *AddMemberToAccountParams, authInfo runtime.ClientAuthInfoWriter) (*AddMemberToAccountOK, error)
 
+	AgentRunnerCommitToBranch(params *AgentRunnerCommitToBranchParams, authInfo runtime.ClientAuthInfoWriter) (*AgentRunnerCommitToBranchOK, error)
+
+	AgentRunnerPullRequest(params *AgentRunnerPullRequestParams, authInfo runtime.ClientAuthInfoWriter) (*AgentRunnerPullRequestOK, error)
+
+	ArchiveAgentRunner(params *ArchiveAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*ArchiveAgentRunnerAccepted, error)
+
 	CancelAccount(params *CancelAccountParams, authInfo runtime.ClientAuthInfoWriter) (*CancelAccountNoContent, error)
 
 	CancelSiteDeploy(params *CancelSiteDeployParams, authInfo runtime.ClientAuthInfoWriter) (*CancelSiteDeployCreated, error)
 
+	ClearSiteDatabaseComputeSettings(params *ClearSiteDatabaseComputeSettingsParams, authInfo runtime.ClientAuthInfoWriter) (*ClearSiteDatabaseComputeSettingsNoContent, error)
+
 	ConfigureDNSForSite(params *ConfigureDNSForSiteParams, authInfo runtime.ClientAuthInfoWriter) (*ConfigureDNSForSiteOK, error)
 
 	CreateAccount(params *CreateAccountParams, authInfo runtime.ClientAuthInfoWriter) (*CreateAccountCreated, error)
+
+	CreateAgentRunner(params *CreateAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*CreateAgentRunnerOK, error)
+
+	CreateAgentRunnerSession(params *CreateAgentRunnerSessionParams, authInfo runtime.ClientAuthInfoWriter) (*CreateAgentRunnerSessionOK, error)
+
+	CreateAgentRunnerUploadURL(params *CreateAgentRunnerUploadURLParams, authInfo runtime.ClientAuthInfoWriter) (*CreateAgentRunnerUploadURLOK, error)
 
 	CreateDeployKey(params *CreateDeployKeyParams, authInfo runtime.ClientAuthInfoWriter) (*CreateDeployKeyCreated, error)
 
@@ -53,11 +67,19 @@ type ClientService interface {
 
 	CreateSite(params *CreateSiteParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteCreated, error)
 
+	CreateSiteAgentRunnerHook(params *CreateSiteAgentRunnerHookParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteAgentRunnerHookCreated, error)
+
 	CreateSiteAsset(params *CreateSiteAssetParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteAssetCreated, error)
 
 	CreateSiteBuild(params *CreateSiteBuildParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteBuildOK, error)
 
 	CreateSiteBuildHook(params *CreateSiteBuildHookParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteBuildHookCreated, error)
+
+	CreateSiteDatabase(params *CreateSiteDatabaseParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteDatabaseOK, *CreateSiteDatabaseCreated, error)
+
+	CreateSiteDatabaseBranch(params *CreateSiteDatabaseBranchParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteDatabaseBranchOK, *CreateSiteDatabaseBranchCreated, error)
+
+	CreateSiteDatabaseSnapshot(params *CreateSiteDatabaseSnapshotParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteDatabaseSnapshotCreated, error)
 
 	CreateSiteDeploy(params *CreateSiteDeployParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteDeployOK, error)
 
@@ -72,6 +94,10 @@ type ClientService interface {
 	CreateSplitTest(params *CreateSplitTestParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSplitTestCreated, error)
 
 	CreateTicket(params *CreateTicketParams, authInfo runtime.ClientAuthInfoWriter) (*CreateTicketCreated, error)
+
+	DeleteAgentRunner(params *DeleteAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteAgentRunnerAccepted, error)
+
+	DeleteAgentRunnerSession(params *DeleteAgentRunnerSessionParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteAgentRunnerSessionAccepted, error)
 
 	DeleteDeploy(params *DeleteDeployParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDeployNoContent, error)
 
@@ -91,9 +117,17 @@ type ClientService interface {
 
 	DeleteSite(params *DeleteSiteParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteNoContent, error)
 
+	DeleteSiteAgentRunnerHook(params *DeleteSiteAgentRunnerHookParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteAgentRunnerHookNoContent, error)
+
 	DeleteSiteAsset(params *DeleteSiteAssetParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteAssetNoContent, error)
 
 	DeleteSiteBuildHook(params *DeleteSiteBuildHookParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteBuildHookNoContent, error)
+
+	DeleteSiteDatabase(params *DeleteSiteDatabaseParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteDatabaseNoContent, error)
+
+	DeleteSiteDatabaseBranch(params *DeleteSiteDatabaseBranchParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteDatabaseBranchNoContent, error)
+
+	DeleteSiteDatabaseSnapshot(params *DeleteSiteDatabaseSnapshotParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteDatabaseSnapshotNoContent, error)
 
 	DeleteSiteDeploy(params *DeleteSiteDeployParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteDeployNoContent, error)
 
@@ -107,19 +141,33 @@ type ClientService interface {
 
 	DeleteSubmission(params *DeleteSubmissionParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSubmissionNoContent, error)
 
+	DisableSite(params *DisableSiteParams, authInfo runtime.ClientAuthInfoWriter) (*DisableSiteNoContent, error)
+
 	DisableSplitTest(params *DisableSplitTestParams, authInfo runtime.ClientAuthInfoWriter) (*DisableSplitTestNoContent, error)
 
 	EnableHook(params *EnableHookParams, authInfo runtime.ClientAuthInfoWriter) (*EnableHookOK, error)
+
+	EnableSite(params *EnableSiteParams, authInfo runtime.ClientAuthInfoWriter) (*EnableSiteNoContent, error)
 
 	EnableSplitTest(params *EnableSplitTestParams, authInfo runtime.ClientAuthInfoWriter) (*EnableSplitTestNoContent, error)
 
 	ExchangeTicket(params *ExchangeTicketParams, authInfo runtime.ClientAuthInfoWriter) (*ExchangeTicketCreated, error)
 
+	GetAIGatewayProviders(params *GetAIGatewayProvidersParams) (*GetAIGatewayProvidersOK, error)
+
+	GetAIGatewayToken(params *GetAIGatewayTokenParams, authInfo runtime.ClientAuthInfoWriter) (*GetAIGatewayTokenOK, error)
+
 	GetAccount(params *GetAccountParams, authInfo runtime.ClientAuthInfoWriter) (*GetAccountOK, error)
+
+	GetAccountAIGatewayToken(params *GetAccountAIGatewayTokenParams, authInfo runtime.ClientAuthInfoWriter) (*GetAccountAIGatewayTokenOK, error)
 
 	GetAccountBuildStatus(params *GetAccountBuildStatusParams, authInfo runtime.ClientAuthInfoWriter) (*GetAccountBuildStatusOK, error)
 
 	GetAccountMember(params *GetAccountMemberParams, authInfo runtime.ClientAuthInfoWriter) (*GetAccountMemberOK, error)
+
+	GetAgentRunner(params *GetAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*GetAgentRunnerOK, error)
+
+	GetAgentRunnerSession(params *GetAgentRunnerSessionParams, authInfo runtime.ClientAuthInfoWriter) (*GetAgentRunnerSessionOK, error)
 
 	GetAllCertificates(params *GetAllCertificatesParams, authInfo runtime.ClientAuthInfoWriter) (*GetAllCertificatesOK, error)
 
@@ -151,6 +199,8 @@ type ClientService interface {
 
 	GetSite(params *GetSiteParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteOK, error)
 
+	GetSiteAgentRunnerHook(params *GetSiteAgentRunnerHookParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteAgentRunnerHookOK, error)
+
 	GetSiteAssetInfo(params *GetSiteAssetInfoParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteAssetInfoOK, error)
 
 	GetSiteAssetPublicSignature(params *GetSiteAssetPublicSignatureParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteAssetPublicSignatureOK, error)
@@ -158,6 +208,14 @@ type ClientService interface {
 	GetSiteBuild(params *GetSiteBuildParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteBuildOK, error)
 
 	GetSiteBuildHook(params *GetSiteBuildHookParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteBuildHookOK, error)
+
+	GetSiteDatabase(params *GetSiteDatabaseParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteDatabaseOK, error)
+
+	GetSiteDatabaseBranch(params *GetSiteDatabaseBranchParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteDatabaseBranchOK, error)
+
+	GetSiteDatabaseComputeSettings(params *GetSiteDatabaseComputeSettingsParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteDatabaseComputeSettingsOK, error)
+
+	GetSiteDatabaseMigration(params *GetSiteDatabaseMigrationParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteDatabaseMigrationOK, error)
 
 	GetSiteDeploy(params *GetSiteDeployParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteDeployOK, error)
 
@@ -183,6 +241,10 @@ type ClientService interface {
 
 	ListAccountsForUser(params *ListAccountsForUserParams, authInfo runtime.ClientAuthInfoWriter) (*ListAccountsForUserOK, error)
 
+	ListAgentRunnerSessions(params *ListAgentRunnerSessionsParams, authInfo runtime.ClientAuthInfoWriter) (*ListAgentRunnerSessionsOK, error)
+
+	ListAgentRunners(params *ListAgentRunnersParams, authInfo runtime.ClientAuthInfoWriter) (*ListAgentRunnersOK, error)
+
 	ListDeployKeys(params *ListDeployKeysParams, authInfo runtime.ClientAuthInfoWriter) (*ListDeployKeysOK, error)
 
 	ListFormSubmission(params *ListFormSubmissionParams, authInfo runtime.ClientAuthInfoWriter) (*ListFormSubmissionOK, error)
@@ -199,11 +261,19 @@ type ClientService interface {
 
 	ListServiceInstancesForSite(params *ListServiceInstancesForSiteParams, authInfo runtime.ClientAuthInfoWriter) (*ListServiceInstancesForSiteOK, error)
 
+	ListSiteAgentRunnerHooks(params *ListSiteAgentRunnerHooksParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteAgentRunnerHooksOK, error)
+
 	ListSiteAssets(params *ListSiteAssetsParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteAssetsOK, error)
 
 	ListSiteBuildHooks(params *ListSiteBuildHooksParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteBuildHooksOK, error)
 
 	ListSiteBuilds(params *ListSiteBuildsParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteBuildsOK, error)
+
+	ListSiteDatabaseBranches(params *ListSiteDatabaseBranchesParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteDatabaseBranchesOK, error)
+
+	ListSiteDatabaseMigrations(params *ListSiteDatabaseMigrationsParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteDatabaseMigrationsOK, error)
+
+	ListSiteDatabaseSnapshots(params *ListSiteDatabaseSnapshotsParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteDatabaseSnapshotsOK, error)
 
 	ListSiteDeployedBranches(params *ListSiteDeployedBranchesParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteDeployedBranchesOK, error)
 
@@ -237,13 +307,23 @@ type ClientService interface {
 
 	RemoveAccountMember(params *RemoveAccountMemberParams, authInfo runtime.ClientAuthInfoWriter) (*RemoveAccountMemberNoContent, error)
 
+	ResetSiteDatabaseBranch(params *ResetSiteDatabaseBranchParams, authInfo runtime.ClientAuthInfoWriter) (*ResetSiteDatabaseBranchOK, error)
+
+	RestoreSiteDatabaseSnapshot(params *RestoreSiteDatabaseSnapshotParams, authInfo runtime.ClientAuthInfoWriter) (*RestoreSiteDatabaseSnapshotOK, error)
+
 	RestoreSiteDeploy(params *RestoreSiteDeployParams, authInfo runtime.ClientAuthInfoWriter) (*RestoreSiteDeployCreated, error)
 
 	RollbackSiteDeploy(params *RollbackSiteDeployParams, authInfo runtime.ClientAuthInfoWriter) (*RollbackSiteDeployNoContent, error)
 
+	RunSiteDatabaseMigrations(params *RunSiteDatabaseMigrationsParams, authInfo runtime.ClientAuthInfoWriter) (*RunSiteDatabaseMigrationsOK, error)
+
 	SearchSiteFunctions(params *SearchSiteFunctionsParams, authInfo runtime.ClientAuthInfoWriter) (*SearchSiteFunctionsOK, error)
 
 	SetEnvVarValue(params *SetEnvVarValueParams, authInfo runtime.ClientAuthInfoWriter) (*SetEnvVarValueCreated, error)
+
+	SetSiteDatabaseBranchComputeSettings(params *SetSiteDatabaseBranchComputeSettingsParams, authInfo runtime.ClientAuthInfoWriter) (*SetSiteDatabaseBranchComputeSettingsOK, error)
+
+	SetSiteDatabaseComputeSettings(params *SetSiteDatabaseComputeSettingsParams, authInfo runtime.ClientAuthInfoWriter) (*SetSiteDatabaseComputeSettingsOK, error)
 
 	ShowService(params *ShowServiceParams, authInfo runtime.ClientAuthInfoWriter) (*ShowServiceOK, error)
 
@@ -265,6 +345,14 @@ type ClientService interface {
 
 	UpdateAccountMember(params *UpdateAccountMemberParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateAccountMemberOK, error)
 
+	UpdateAgentRunner(params *UpdateAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateAgentRunnerOK, error)
+
+	UpdateAgentRunnerSession(params *UpdateAgentRunnerSessionParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateAgentRunnerSessionOK, error)
+
+	UpdateDeployValidations(params *UpdateDeployValidationsParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateDeployValidationsOK, error)
+
+	UpdateDevServerState(params *UpdateDevServerStateParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateDevServerStateOK, error)
+
 	UpdateEnvVar(params *UpdateEnvVarParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateEnvVarOK, error)
 
 	UpdateHook(params *UpdateHookParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateHookOK, error)
@@ -274,6 +362,8 @@ type ClientService interface {
 	UpdateServiceInstance(params *UpdateServiceInstanceParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateServiceInstanceNoContent, error)
 
 	UpdateSite(params *UpdateSiteParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSiteOK, error)
+
+	UpdateSiteAgentRunnerHook(params *UpdateSiteAgentRunnerHookParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSiteAgentRunnerHookNoContent, error)
 
 	UpdateSiteAsset(params *UpdateSiteAssetParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSiteAssetOK, error)
 
@@ -291,9 +381,13 @@ type ClientService interface {
 
 	UpdateSplitTest(params *UpdateSplitTestParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSplitTestCreated, error)
 
+	UploadDeployEdgeFunction(params *UploadDeployEdgeFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*UploadDeployEdgeFunctionOK, error)
+
 	UploadDeployFile(params *UploadDeployFileParams, authInfo runtime.ClientAuthInfoWriter) (*UploadDeployFileOK, error)
 
 	UploadDeployFunction(params *UploadDeployFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*UploadDeployFunctionOK, error)
+
+	UploadDeployServer(params *UploadDeployServerParams, authInfo runtime.ClientAuthInfoWriter) (*UploadDeployServerOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -329,6 +423,108 @@ func (a *Client) AddMemberToAccount(params *AddMemberToAccountParams, authInfo r
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*AddMemberToAccountDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+AgentRunnerCommitToBranch agent runner commit to branch API
+*/
+func (a *Client) AgentRunnerCommitToBranch(params *AgentRunnerCommitToBranchParams, authInfo runtime.ClientAuthInfoWriter) (*AgentRunnerCommitToBranchOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAgentRunnerCommitToBranchParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "agentRunnerCommitToBranch",
+		Method:             "POST",
+		PathPattern:        "/agent_runners/{agent_runner_id}/commit",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &AgentRunnerCommitToBranchReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*AgentRunnerCommitToBranchOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*AgentRunnerCommitToBranchDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+AgentRunnerPullRequest agent runner pull request API
+*/
+func (a *Client) AgentRunnerPullRequest(params *AgentRunnerPullRequestParams, authInfo runtime.ClientAuthInfoWriter) (*AgentRunnerPullRequestOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAgentRunnerPullRequestParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "agentRunnerPullRequest",
+		Method:             "POST",
+		PathPattern:        "/agent_runners/{agent_runner_id}/pull_request",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &AgentRunnerPullRequestReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*AgentRunnerPullRequestOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*AgentRunnerPullRequestDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+ArchiveAgentRunner archive agent runner API
+*/
+func (a *Client) ArchiveAgentRunner(params *ArchiveAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*ArchiveAgentRunnerAccepted, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewArchiveAgentRunnerParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "archiveAgentRunner",
+		Method:             "POST",
+		PathPattern:        "/agent_runners/{agent_runner_id}/archive",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &ArchiveAgentRunnerReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ArchiveAgentRunnerAccepted)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ArchiveAgentRunnerDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -401,6 +597,40 @@ func (a *Client) CancelSiteDeploy(params *CancelSiteDeployParams, authInfo runti
 }
 
 /*
+ClearSiteDatabaseComputeSettings Resets project-level compute settings to tier defaults. Requires a Pro or higher plan.
+*/
+func (a *Client) ClearSiteDatabaseComputeSettings(params *ClearSiteDatabaseComputeSettingsParams, authInfo runtime.ClientAuthInfoWriter) (*ClearSiteDatabaseComputeSettingsNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewClearSiteDatabaseComputeSettingsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "clearSiteDatabaseComputeSettings",
+		Method:             "DELETE",
+		PathPattern:        "/sites/{site_id}/database/compute/settings",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &ClearSiteDatabaseComputeSettingsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ClearSiteDatabaseComputeSettingsNoContent)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ClearSiteDatabaseComputeSettingsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 ConfigureDNSForSite configure DNS for site API
 */
 func (a *Client) ConfigureDNSForSite(params *ConfigureDNSForSiteParams, authInfo runtime.ClientAuthInfoWriter) (*ConfigureDNSForSiteOK, error) {
@@ -465,6 +695,108 @@ func (a *Client) CreateAccount(params *CreateAccountParams, authInfo runtime.Cli
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*CreateAccountDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+CreateAgentRunner create agent runner API
+*/
+func (a *Client) CreateAgentRunner(params *CreateAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*CreateAgentRunnerOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateAgentRunnerParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createAgentRunner",
+		Method:             "POST",
+		PathPattern:        "/agent_runners",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &CreateAgentRunnerReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*CreateAgentRunnerOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*CreateAgentRunnerDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+CreateAgentRunnerSession create agent runner session API
+*/
+func (a *Client) CreateAgentRunnerSession(params *CreateAgentRunnerSessionParams, authInfo runtime.ClientAuthInfoWriter) (*CreateAgentRunnerSessionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateAgentRunnerSessionParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createAgentRunnerSession",
+		Method:             "POST",
+		PathPattern:        "/agent_runners/{agent_runner_id}/sessions",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &CreateAgentRunnerSessionReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*CreateAgentRunnerSessionOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*CreateAgentRunnerSessionDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+CreateAgentRunnerUploadURL create agent runner upload Url API
+*/
+func (a *Client) CreateAgentRunnerUploadURL(params *CreateAgentRunnerUploadURLParams, authInfo runtime.ClientAuthInfoWriter) (*CreateAgentRunnerUploadURLOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateAgentRunnerUploadURLParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createAgentRunnerUploadUrl",
+		Method:             "POST",
+		PathPattern:        "/agent_runners/upload_url",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &CreateAgentRunnerUploadURLReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*CreateAgentRunnerUploadURLOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*CreateAgentRunnerUploadURLDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -741,6 +1073,40 @@ func (a *Client) CreateSite(params *CreateSiteParams, authInfo runtime.ClientAut
 }
 
 /*
+CreateSiteAgentRunnerHook create site agent runner hook API
+*/
+func (a *Client) CreateSiteAgentRunnerHook(params *CreateSiteAgentRunnerHookParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteAgentRunnerHookCreated, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateSiteAgentRunnerHookParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createSiteAgentRunnerHook",
+		Method:             "POST",
+		PathPattern:        "/sites/{site_id}/agent_runner_hooks",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &CreateSiteAgentRunnerHookReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*CreateSiteAgentRunnerHookCreated)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*CreateSiteAgentRunnerHookDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 CreateSiteAsset create site asset API
 */
 func (a *Client) CreateSiteAsset(params *CreateSiteAssetParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteAssetCreated, error) {
@@ -775,7 +1141,11 @@ func (a *Client) CreateSiteAsset(params *CreateSiteAssetParams, authInfo runtime
 }
 
 /*
-CreateSiteBuild create site build API
+	CreateSiteBuild Runs a build for a site. The build will be scheduled to run at the first opportunity, but it might not start immediately if insufficient account build capacity is available.
+
+Files for build can be uploaded as a zipped site using one of these methods:
+1. Set Content-Type to 'application/zip' and send the zip file as the raw request body
+2. Set Content-Type to 'multipart/form-data' and include the zip file in the 'zip' field
 */
 func (a *Client) CreateSiteBuild(params *CreateSiteBuildParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteBuildOK, error) {
 	// TODO: Validate the params before sending
@@ -788,7 +1158,7 @@ func (a *Client) CreateSiteBuild(params *CreateSiteBuildParams, authInfo runtime
 		Method:             "POST",
 		PathPattern:        "/sites/{site_id}/builds",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"multipart/form-data"},
 		Schemes:            []string{"https"},
 		Params:             params,
 		Reader:             &CreateSiteBuildReader{formats: a.formats},
@@ -839,6 +1209,112 @@ func (a *Client) CreateSiteBuildHook(params *CreateSiteBuildHookParams, authInfo
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*CreateSiteBuildHookDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+CreateSiteDatabase Creates a new database for the specified site. If a database already exists, returns the existing connection string. The database region defaults to the site's functions region if not specified.
+*/
+func (a *Client) CreateSiteDatabase(params *CreateSiteDatabaseParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteDatabaseOK, *CreateSiteDatabaseCreated, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateSiteDatabaseParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createSiteDatabase",
+		Method:             "POST",
+		PathPattern:        "/sites/{site_id}/database",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &CreateSiteDatabaseReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	switch value := result.(type) {
+	case *CreateSiteDatabaseOK:
+		return value, nil, nil
+	case *CreateSiteDatabaseCreated:
+		return nil, value, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*CreateSiteDatabaseDefault)
+	return nil, nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+CreateSiteDatabaseBranch Creates a new database branch. If a branch already exists for the specified branch ID, returns the existing connection string.
+*/
+func (a *Client) CreateSiteDatabaseBranch(params *CreateSiteDatabaseBranchParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteDatabaseBranchOK, *CreateSiteDatabaseBranchCreated, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateSiteDatabaseBranchParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createSiteDatabaseBranch",
+		Method:             "POST",
+		PathPattern:        "/sites/{site_id}/database/branch",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &CreateSiteDatabaseBranchReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	switch value := result.(type) {
+	case *CreateSiteDatabaseBranchOK:
+		return value, nil, nil
+	case *CreateSiteDatabaseBranchCreated:
+		return nil, value, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*CreateSiteDatabaseBranchDefault)
+	return nil, nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+CreateSiteDatabaseSnapshot Creates a point-in-time snapshot of a database branch. Defaults to the production branch if no branch name is specified.
+*/
+func (a *Client) CreateSiteDatabaseSnapshot(params *CreateSiteDatabaseSnapshotParams, authInfo runtime.ClientAuthInfoWriter) (*CreateSiteDatabaseSnapshotCreated, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateSiteDatabaseSnapshotParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createSiteDatabaseSnapshot",
+		Method:             "POST",
+		PathPattern:        "/sites/{site_id}/database/snapshot",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &CreateSiteDatabaseSnapshotReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*CreateSiteDatabaseSnapshotCreated)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*CreateSiteDatabaseSnapshotDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -1077,6 +1553,74 @@ func (a *Client) CreateTicket(params *CreateTicketParams, authInfo runtime.Clien
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*CreateTicketDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+DeleteAgentRunner delete agent runner API
+*/
+func (a *Client) DeleteAgentRunner(params *DeleteAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteAgentRunnerAccepted, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteAgentRunnerParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteAgentRunner",
+		Method:             "DELETE",
+		PathPattern:        "/agent_runners/{agent_runner_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &DeleteAgentRunnerReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*DeleteAgentRunnerAccepted)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*DeleteAgentRunnerDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+DeleteAgentRunnerSession delete agent runner session API
+*/
+func (a *Client) DeleteAgentRunnerSession(params *DeleteAgentRunnerSessionParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteAgentRunnerSessionAccepted, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteAgentRunnerSessionParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteAgentRunnerSession",
+		Method:             "DELETE",
+		PathPattern:        "/agent_runners/{agent_runner_id}/sessions/{agent_runner_session_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &DeleteAgentRunnerSessionReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*DeleteAgentRunnerSessionAccepted)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*DeleteAgentRunnerSessionDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -1388,6 +1932,40 @@ func (a *Client) DeleteSite(params *DeleteSiteParams, authInfo runtime.ClientAut
 }
 
 /*
+DeleteSiteAgentRunnerHook delete site agent runner hook API
+*/
+func (a *Client) DeleteSiteAgentRunnerHook(params *DeleteSiteAgentRunnerHookParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteAgentRunnerHookNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteSiteAgentRunnerHookParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteSiteAgentRunnerHook",
+		Method:             "DELETE",
+		PathPattern:        "/sites/{site_id}/agent_runner_hooks/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &DeleteSiteAgentRunnerHookReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*DeleteSiteAgentRunnerHookNoContent)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*DeleteSiteAgentRunnerHookDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 DeleteSiteAsset delete site asset API
 */
 func (a *Client) DeleteSiteAsset(params *DeleteSiteAssetParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteAssetNoContent, error) {
@@ -1452,6 +2030,108 @@ func (a *Client) DeleteSiteBuildHook(params *DeleteSiteBuildHookParams, authInfo
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*DeleteSiteBuildHookDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+DeleteSiteDatabase Deletes the database and all associated branches and snapshots for the specified site.
+*/
+func (a *Client) DeleteSiteDatabase(params *DeleteSiteDatabaseParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteDatabaseNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteSiteDatabaseParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteSiteDatabase",
+		Method:             "DELETE",
+		PathPattern:        "/sites/{site_id}/database",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &DeleteSiteDatabaseReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*DeleteSiteDatabaseNoContent)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*DeleteSiteDatabaseDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+DeleteSiteDatabaseBranch Deletes a database branch.
+*/
+func (a *Client) DeleteSiteDatabaseBranch(params *DeleteSiteDatabaseBranchParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteDatabaseBranchNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteSiteDatabaseBranchParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteSiteDatabaseBranch",
+		Method:             "DELETE",
+		PathPattern:        "/sites/{site_id}/database/branch/{branch_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &DeleteSiteDatabaseBranchReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*DeleteSiteDatabaseBranchNoContent)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*DeleteSiteDatabaseBranchDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+DeleteSiteDatabaseSnapshot Deletes a database snapshot.
+*/
+func (a *Client) DeleteSiteDatabaseSnapshot(params *DeleteSiteDatabaseSnapshotParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSiteDatabaseSnapshotNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteSiteDatabaseSnapshotParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteSiteDatabaseSnapshot",
+		Method:             "DELETE",
+		PathPattern:        "/sites/{site_id}/database/snapshot/{snapshot_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &DeleteSiteDatabaseSnapshotReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*DeleteSiteDatabaseSnapshotNoContent)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*DeleteSiteDatabaseSnapshotDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -1660,6 +2340,40 @@ func (a *Client) DeleteSubmission(params *DeleteSubmissionParams, authInfo runti
 }
 
 /*
+DisableSite Disables a site, preventing it from serving content. The site can be re-enabled later using the enable endpoint.
+*/
+func (a *Client) DisableSite(params *DisableSiteParams, authInfo runtime.ClientAuthInfoWriter) (*DisableSiteNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDisableSiteParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "disableSite",
+		Method:             "PUT",
+		PathPattern:        "/sites/{site_id}/disable",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &DisableSiteReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*DisableSiteNoContent)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*DisableSiteDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 DisableSplitTest disable split test API
 */
 func (a *Client) DisableSplitTest(params *DisableSplitTestParams, authInfo runtime.ClientAuthInfoWriter) (*DisableSplitTestNoContent, error) {
@@ -1724,6 +2438,40 @@ func (a *Client) EnableHook(params *EnableHookParams, authInfo runtime.ClientAut
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*EnableHookDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+EnableSite Re-enables a site that was previously disabled by the user. Sites that were disabled for usage exceeded or marked as spam cannot be re-enabled via this endpoint.
+*/
+func (a *Client) EnableSite(params *EnableSiteParams, authInfo runtime.ClientAuthInfoWriter) (*EnableSiteNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewEnableSiteParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "enableSite",
+		Method:             "PUT",
+		PathPattern:        "/sites/{site_id}/enable",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &EnableSiteReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*EnableSiteNoContent)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*EnableSiteDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -1796,6 +2544,73 @@ func (a *Client) ExchangeTicket(params *ExchangeTicketParams, authInfo runtime.C
 }
 
 /*
+GetAIGatewayProviders get a i gateway providers API
+*/
+func (a *Client) GetAIGatewayProviders(params *GetAIGatewayProvidersParams) (*GetAIGatewayProvidersOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAIGatewayProvidersParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAIGatewayProviders",
+		Method:             "GET",
+		PathPattern:        "/ai-gateway/providers",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetAIGatewayProvidersReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAIGatewayProvidersOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetAIGatewayProvidersDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetAIGatewayToken Returns an AI Gateway token for a specific site
+*/
+func (a *Client) GetAIGatewayToken(params *GetAIGatewayTokenParams, authInfo runtime.ClientAuthInfoWriter) (*GetAIGatewayTokenOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAIGatewayTokenParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAIGatewayToken",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/ai-gateway/token",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetAIGatewayTokenReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAIGatewayTokenOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetAIGatewayTokenDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 GetAccount get account API
 */
 func (a *Client) GetAccount(params *GetAccountParams, authInfo runtime.ClientAuthInfoWriter) (*GetAccountOK, error) {
@@ -1826,6 +2641,40 @@ func (a *Client) GetAccount(params *GetAccountParams, authInfo runtime.ClientAut
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*GetAccountDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetAccountAIGatewayToken Returns an AI Gateway token scoped to an account
+*/
+func (a *Client) GetAccountAIGatewayToken(params *GetAccountAIGatewayTokenParams, authInfo runtime.ClientAuthInfoWriter) (*GetAccountAIGatewayTokenOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAccountAIGatewayTokenParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAccountAIGatewayToken",
+		Method:             "GET",
+		PathPattern:        "/accounts/{account_id}/ai-gateway/token",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetAccountAIGatewayTokenReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAccountAIGatewayTokenOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetAccountAIGatewayTokenDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -1894,6 +2743,74 @@ func (a *Client) GetAccountMember(params *GetAccountMemberParams, authInfo runti
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*GetAccountMemberDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetAgentRunner get agent runner API
+*/
+func (a *Client) GetAgentRunner(params *GetAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*GetAgentRunnerOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAgentRunnerParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAgentRunner",
+		Method:             "GET",
+		PathPattern:        "/agent_runners/{agent_runner_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetAgentRunnerReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAgentRunnerOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetAgentRunnerDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetAgentRunnerSession get agent runner session API
+*/
+func (a *Client) GetAgentRunnerSession(params *GetAgentRunnerSessionParams, authInfo runtime.ClientAuthInfoWriter) (*GetAgentRunnerSessionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAgentRunnerSessionParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getAgentRunnerSession",
+		Method:             "GET",
+		PathPattern:        "/agent_runners/{agent_runner_id}/sessions/{agent_runner_session_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetAgentRunnerSessionReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetAgentRunnerSessionOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetAgentRunnerSessionDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -2409,6 +3326,40 @@ func (a *Client) GetSite(params *GetSiteParams, authInfo runtime.ClientAuthInfoW
 }
 
 /*
+GetSiteAgentRunnerHook get site agent runner hook API
+*/
+func (a *Client) GetSiteAgentRunnerHook(params *GetSiteAgentRunnerHookParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteAgentRunnerHookOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSiteAgentRunnerHookParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSiteAgentRunnerHook",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/agent_runner_hooks/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetSiteAgentRunnerHookReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetSiteAgentRunnerHookOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetSiteAgentRunnerHookDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 GetSiteAssetInfo get site asset info API
 */
 func (a *Client) GetSiteAssetInfo(params *GetSiteAssetInfoParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteAssetInfoOK, error) {
@@ -2541,6 +3492,142 @@ func (a *Client) GetSiteBuildHook(params *GetSiteBuildHookParams, authInfo runti
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*GetSiteBuildHookDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetSiteDatabase Returns the database connection string for the specified site.
+*/
+func (a *Client) GetSiteDatabase(params *GetSiteDatabaseParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteDatabaseOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSiteDatabaseParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSiteDatabase",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/database",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetSiteDatabaseReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetSiteDatabaseOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetSiteDatabaseDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetSiteDatabaseBranch Returns the database branch connection string for a specific branch.
+*/
+func (a *Client) GetSiteDatabaseBranch(params *GetSiteDatabaseBranchParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteDatabaseBranchOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSiteDatabaseBranchParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSiteDatabaseBranch",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/database/branch/{branch_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetSiteDatabaseBranchReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetSiteDatabaseBranchOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetSiteDatabaseBranchDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetSiteDatabaseComputeSettings Returns the project-level compute settings for the database. Returns effective settings (custom or tier defaults). Requires a Pro or higher plan.
+*/
+func (a *Client) GetSiteDatabaseComputeSettings(params *GetSiteDatabaseComputeSettingsParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteDatabaseComputeSettingsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSiteDatabaseComputeSettingsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSiteDatabaseComputeSettings",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/database/compute/settings",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetSiteDatabaseComputeSettingsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetSiteDatabaseComputeSettingsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetSiteDatabaseComputeSettingsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetSiteDatabaseMigration Returns the contents of a named migration for the specified branch.
+*/
+func (a *Client) GetSiteDatabaseMigration(params *GetSiteDatabaseMigrationParams, authInfo runtime.ClientAuthInfoWriter) (*GetSiteDatabaseMigrationOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSiteDatabaseMigrationParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSiteDatabaseMigration",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/database/migrations/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &GetSiteDatabaseMigrationReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetSiteDatabaseMigrationOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetSiteDatabaseMigrationDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -2954,6 +4041,74 @@ func (a *Client) ListAccountsForUser(params *ListAccountsForUserParams, authInfo
 }
 
 /*
+ListAgentRunnerSessions list agent runner sessions API
+*/
+func (a *Client) ListAgentRunnerSessions(params *ListAgentRunnerSessionsParams, authInfo runtime.ClientAuthInfoWriter) (*ListAgentRunnerSessionsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewListAgentRunnerSessionsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "listAgentRunnerSessions",
+		Method:             "GET",
+		PathPattern:        "/agent_runners/{agent_runner_id}/sessions",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &ListAgentRunnerSessionsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ListAgentRunnerSessionsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ListAgentRunnerSessionsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+ListAgentRunners list agent runners API
+*/
+func (a *Client) ListAgentRunners(params *ListAgentRunnersParams, authInfo runtime.ClientAuthInfoWriter) (*ListAgentRunnersOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewListAgentRunnersParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "listAgentRunners",
+		Method:             "GET",
+		PathPattern:        "/agent_runners",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &ListAgentRunnersReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ListAgentRunnersOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ListAgentRunnersDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 ListDeployKeys list deploy keys API
 */
 func (a *Client) ListDeployKeys(params *ListDeployKeysParams, authInfo runtime.ClientAuthInfoWriter) (*ListDeployKeysOK, error) {
@@ -3226,6 +4381,40 @@ func (a *Client) ListServiceInstancesForSite(params *ListServiceInstancesForSite
 }
 
 /*
+ListSiteAgentRunnerHooks list site agent runner hooks API
+*/
+func (a *Client) ListSiteAgentRunnerHooks(params *ListSiteAgentRunnerHooksParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteAgentRunnerHooksOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewListSiteAgentRunnerHooksParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "listSiteAgentRunnerHooks",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/agent_runner_hooks",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &ListSiteAgentRunnerHooksReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ListSiteAgentRunnerHooksOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ListSiteAgentRunnerHooksDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 ListSiteAssets list site assets API
 */
 func (a *Client) ListSiteAssets(params *ListSiteAssetsParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteAssetsOK, error) {
@@ -3324,6 +4513,108 @@ func (a *Client) ListSiteBuilds(params *ListSiteBuildsParams, authInfo runtime.C
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*ListSiteBuildsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+ListSiteDatabaseBranches Returns all branches for the site's database with compute status and metadata.
+*/
+func (a *Client) ListSiteDatabaseBranches(params *ListSiteDatabaseBranchesParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteDatabaseBranchesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewListSiteDatabaseBranchesParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "listSiteDatabaseBranches",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/database/branches",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &ListSiteDatabaseBranchesReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ListSiteDatabaseBranchesOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ListSiteDatabaseBranchesDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+ListSiteDatabaseMigrations Returns the list of migrations available for the specified branch, indicating which ones have been applied to the database.
+*/
+func (a *Client) ListSiteDatabaseMigrations(params *ListSiteDatabaseMigrationsParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteDatabaseMigrationsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewListSiteDatabaseMigrationsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "listSiteDatabaseMigrations",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/database/migrations",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &ListSiteDatabaseMigrationsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ListSiteDatabaseMigrationsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ListSiteDatabaseMigrationsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+ListSiteDatabaseSnapshots Returns all snapshots for the site's database.
+*/
+func (a *Client) ListSiteDatabaseSnapshots(params *ListSiteDatabaseSnapshotsParams, authInfo runtime.ClientAuthInfoWriter) (*ListSiteDatabaseSnapshotsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewListSiteDatabaseSnapshotsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "listSiteDatabaseSnapshots",
+		Method:             "GET",
+		PathPattern:        "/sites/{site_id}/database/snapshots",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &ListSiteDatabaseSnapshotsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ListSiteDatabaseSnapshotsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ListSiteDatabaseSnapshotsDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -3771,7 +5062,15 @@ func (a *Client) NotifyBuildStart(params *NotifyBuildStartParams, authInfo runti
 }
 
 /*
-ProvisionSiteTLSCertificate provision site TLS certificate API
+	ProvisionSiteTLSCertificate Provisions or updates a TLS certificate for the site.
+
+**Creating a certificate (site has no certificate):**
+- Omit certificate params to initiate Let's Encrypt provisioning
+- Provide certificate, key, and ca_certificates to upload a custom certificate
+
+**Updating a certificate (site already has a certificate):**
+- REQUIRES certificate, key, and ca_certificates to replace with a new custom certificate
+- Use POST /api/v1/sites/{site_id}/ssl/renew to renew an existing Let's Encrypt certificate
 */
 func (a *Client) ProvisionSiteTLSCertificate(params *ProvisionSiteTLSCertificateParams, authInfo runtime.ClientAuthInfoWriter) (*ProvisionSiteTLSCertificateOK, error) {
 	// TODO: Validate the params before sending
@@ -3874,6 +5173,74 @@ func (a *Client) RemoveAccountMember(params *RemoveAccountMemberParams, authInfo
 }
 
 /*
+ResetSiteDatabaseBranch Resets a non-production database branch by re-forking it from a source branch (defaults to the production branch). If the target branch is already in sync with the source, returns the existing connection string without performing a reset, unless `force=true` is passed. The production branch cannot be reset.
+*/
+func (a *Client) ResetSiteDatabaseBranch(params *ResetSiteDatabaseBranchParams, authInfo runtime.ClientAuthInfoWriter) (*ResetSiteDatabaseBranchOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewResetSiteDatabaseBranchParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "resetSiteDatabaseBranch",
+		Method:             "POST",
+		PathPattern:        "/sites/{site_id}/database/branch/{branch_id}/reset",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &ResetSiteDatabaseBranchReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ResetSiteDatabaseBranchOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*ResetSiteDatabaseBranchDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+RestoreSiteDatabaseSnapshot Restores a snapshot to a database branch. Defaults to the production branch if no branch_name is specified.
+*/
+func (a *Client) RestoreSiteDatabaseSnapshot(params *RestoreSiteDatabaseSnapshotParams, authInfo runtime.ClientAuthInfoWriter) (*RestoreSiteDatabaseSnapshotOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRestoreSiteDatabaseSnapshotParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "restoreSiteDatabaseSnapshot",
+		Method:             "POST",
+		PathPattern:        "/sites/{site_id}/database/snapshot/{snapshot_id}/restore",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &RestoreSiteDatabaseSnapshotReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*RestoreSiteDatabaseSnapshotOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*RestoreSiteDatabaseSnapshotDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 RestoreSiteDeploy restore site deploy API
 */
 func (a *Client) RestoreSiteDeploy(params *RestoreSiteDeployParams, authInfo runtime.ClientAuthInfoWriter) (*RestoreSiteDeployCreated, error) {
@@ -3942,6 +5309,40 @@ func (a *Client) RollbackSiteDeploy(params *RollbackSiteDeployParams, authInfo r
 }
 
 /*
+RunSiteDatabaseMigrations Runs database migrations for the specified deploy. Finds the deploy and determines the appropriate branch.
+*/
+func (a *Client) RunSiteDatabaseMigrations(params *RunSiteDatabaseMigrationsParams, authInfo runtime.ClientAuthInfoWriter) (*RunSiteDatabaseMigrationsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRunSiteDatabaseMigrationsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "runSiteDatabaseMigrations",
+		Method:             "POST",
+		PathPattern:        "/sites/{site_id}/database/migrations/{deploy_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &RunSiteDatabaseMigrationsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*RunSiteDatabaseMigrationsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*RunSiteDatabaseMigrationsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 SearchSiteFunctions search site functions API
 */
 func (a *Client) SearchSiteFunctions(params *SearchSiteFunctionsParams, authInfo runtime.ClientAuthInfoWriter) (*SearchSiteFunctionsOK, error) {
@@ -4006,6 +5407,74 @@ func (a *Client) SetEnvVarValue(params *SetEnvVarValueParams, authInfo runtime.C
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*SetEnvVarValueDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+SetSiteDatabaseBranchComputeSettings Sets compute settings for a specific database branch, overriding project-level settings. Requires a Pro or higher plan.
+*/
+func (a *Client) SetSiteDatabaseBranchComputeSettings(params *SetSiteDatabaseBranchComputeSettingsParams, authInfo runtime.ClientAuthInfoWriter) (*SetSiteDatabaseBranchComputeSettingsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSetSiteDatabaseBranchComputeSettingsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "setSiteDatabaseBranchComputeSettings",
+		Method:             "PUT",
+		PathPattern:        "/sites/{site_id}/database/branch/{branch_id}/compute/settings",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &SetSiteDatabaseBranchComputeSettingsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*SetSiteDatabaseBranchComputeSettingsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*SetSiteDatabaseBranchComputeSettingsDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+SetSiteDatabaseComputeSettings Sets project-level compute settings for the database. Applied to new branches. Can be overridden per-branch. Requires a Pro or higher plan.
+*/
+func (a *Client) SetSiteDatabaseComputeSettings(params *SetSiteDatabaseComputeSettingsParams, authInfo runtime.ClientAuthInfoWriter) (*SetSiteDatabaseComputeSettingsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSetSiteDatabaseComputeSettingsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "setSiteDatabaseComputeSettings",
+		Method:             "PUT",
+		PathPattern:        "/sites/{site_id}/database/compute/settings",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &SetSiteDatabaseComputeSettingsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*SetSiteDatabaseComputeSettingsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*SetSiteDatabaseComputeSettingsDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -4356,6 +5825,144 @@ func (a *Client) UpdateAccountMember(params *UpdateAccountMemberParams, authInfo
 }
 
 /*
+UpdateAgentRunner update agent runner API
+*/
+func (a *Client) UpdateAgentRunner(params *UpdateAgentRunnerParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateAgentRunnerOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateAgentRunnerParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateAgentRunner",
+		Method:             "PATCH",
+		PathPattern:        "/agent_runners/{agent_runner_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &UpdateAgentRunnerReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UpdateAgentRunnerOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*UpdateAgentRunnerDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+UpdateAgentRunnerSession update agent runner session API
+*/
+func (a *Client) UpdateAgentRunnerSession(params *UpdateAgentRunnerSessionParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateAgentRunnerSessionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateAgentRunnerSessionParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateAgentRunnerSession",
+		Method:             "PATCH",
+		PathPattern:        "/agent_runners/{agent_runner_id}/sessions/{agent_runner_session_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &UpdateAgentRunnerSessionReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UpdateAgentRunnerSessionOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*UpdateAgentRunnerSessionDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+UpdateDeployValidations Updates the deploy validations report for a deploy.
+*/
+func (a *Client) UpdateDeployValidations(params *UpdateDeployValidationsParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateDeployValidationsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateDeployValidationsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateDeployValidations",
+		Method:             "PATCH",
+		PathPattern:        "/deploys/{deploy_id}/validations_report",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &UpdateDeployValidationsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UpdateDeployValidationsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for updateDeployValidations: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+UpdateDevServerState update dev server state API
+*/
+func (a *Client) UpdateDevServerState(params *UpdateDevServerStateParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateDevServerStateOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateDevServerStateParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateDevServerState",
+		Method:             "POST",
+		PathPattern:        "/sites/{site_id}/dev_servers/{dev_server_id}/state",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &UpdateDevServerStateReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UpdateDevServerStateOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for updateDevServerState: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
 UpdateEnvVar Updates an existing environment variable and all of its values. Existing values will be replaced by values provided.
 */
 func (a *Client) UpdateEnvVar(params *UpdateEnvVarParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateEnvVarOK, error) {
@@ -4522,6 +6129,40 @@ func (a *Client) UpdateSite(params *UpdateSiteParams, authInfo runtime.ClientAut
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*UpdateSiteDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+UpdateSiteAgentRunnerHook update site agent runner hook API
+*/
+func (a *Client) UpdateSiteAgentRunnerHook(params *UpdateSiteAgentRunnerHookParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSiteAgentRunnerHookNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateSiteAgentRunnerHookParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateSiteAgentRunnerHook",
+		Method:             "PUT",
+		PathPattern:        "/sites/{site_id}/agent_runner_hooks/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &UpdateSiteAgentRunnerHookReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UpdateSiteAgentRunnerHookNoContent)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*UpdateSiteAgentRunnerHookDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -4798,6 +6439,40 @@ func (a *Client) UpdateSplitTest(params *UpdateSplitTestParams, authInfo runtime
 }
 
 /*
+UploadDeployEdgeFunction upload deploy edge function API
+*/
+func (a *Client) UploadDeployEdgeFunction(params *UploadDeployEdgeFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*UploadDeployEdgeFunctionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUploadDeployEdgeFunctionParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "uploadDeployEdgeFunction",
+		Method:             "PUT",
+		PathPattern:        "/deploys/{deploy_id}/edge_functions/{code_sha}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/octet-stream"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &UploadDeployEdgeFunctionReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UploadDeployEdgeFunctionOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*UploadDeployEdgeFunctionDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 UploadDeployFile upload deploy file API
 */
 func (a *Client) UploadDeployFile(params *UploadDeployFileParams, authInfo runtime.ClientAuthInfoWriter) (*UploadDeployFileOK, error) {
@@ -4862,6 +6537,42 @@ func (a *Client) UploadDeployFunction(params *UploadDeployFunctionParams, authIn
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*UploadDeployFunctionDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+	UploadDeployServer Uploads the deploy's Netlify Server bundle, addressed by the digest the deploy
+
+declared in its `server` property.
+*/
+func (a *Client) UploadDeployServer(params *UploadDeployServerParams, authInfo runtime.ClientAuthInfoWriter) (*UploadDeployServerOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUploadDeployServerParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "uploadDeployServer",
+		Method:             "PUT",
+		PathPattern:        "/deploys/{deploy_id}/server/{code_sha}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/octet-stream"},
+		Schemes:            []string{"https"},
+		Params:             params,
+		Reader:             &UploadDeployServerReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UploadDeployServerOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*UploadDeployServerDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

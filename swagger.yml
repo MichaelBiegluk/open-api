@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 2.36.0
+  version: 2.60.0
   title: Netlify's API documentation
   description: >-
     Netlify is a hosting service for the programmable web. It understands your
@@ -158,6 +158,22 @@ paths:
     post:
       operationId: provisionSiteTLSCertificate
       tags: [sniCertificate]
+      description: >-
+        Provisions or updates a TLS certificate for the site.
+
+
+        **Creating a certificate (site has no certificate):**
+
+        - Omit certificate params to initiate Let's Encrypt provisioning
+
+        - Provide certificate, key, and ca_certificates to upload a custom certificate
+
+
+        **Updating a certificate (site already has a certificate):**
+
+        - REQUIRES certificate, key, and ca_certificates to replace with a new custom certificate
+
+        - Use POST /api/v1/sites/{site_id}/ssl/renew to renew an existing Let's Encrypt certificate
       parameters:
         - name: site_id
           type: string
@@ -166,17 +182,23 @@ paths:
         - name: certificate
           type: string
           in: query
+          description: PEM-encoded certificate. Required when updating an existing certificate.
         - name: key
           type: string
           in: query
+          description: PEM-encoded private key. Required when updating an existing certificate.
         - name: ca_certificates
           type: string
           in: query
+          description: PEM-encoded CA certificate chain. Required when updating an existing certificate.
       responses:
         '200':
           description: OK
           schema:
             $ref: '#/definitions/sniCertificate'
+        '422':
+          description: >-
+            Unprocessable Entity. Returns errors such as: "certificate parameter is required when updating an existing certificate" (when updating without params), "No custom domain configured", or "bad dns for custom domain"
         default:
           $ref: '#/responses/error'
     get:
@@ -235,6 +257,7 @@ paths:
           enum:
             - all
             - dev
+            - dev-server
             - branch-deploy
             - deploy-preview
             - production
@@ -343,6 +366,7 @@ paths:
           enum:
             - all
             - dev
+            - dev-server
             - branch-deploy
             - deploy-preview
             - production
@@ -497,6 +521,7 @@ paths:
                 enum:
                   - all
                   - dev
+                  - dev-server
                   - branch-deploy
                   - deploy-preview
                   - production
@@ -1116,6 +1141,9 @@ paths:
           type: string
           in: path
           required: true
+        - name: commit_ref
+          type: string
+          in: query
         - name: deploy
           in: body
           schema:
@@ -1205,17 +1233,62 @@ paths:
     post:
       operationId: createSiteBuild
       tags: [build]
+      description: |
+        Runs a build for a site. The build will be scheduled to run at the first opportunity, but it might not start immediately if insufficient account build capacity is available.
+
+        Files for build can be uploaded as a zipped site using one of these methods:
+        1. Set Content-Type to 'application/zip' and send the zip file as the raw request body
+        2. Set Content-Type to 'multipart/form-data' and include the zip file in the 'zip' field
+      consumes:
+        - multipart/form-data
       parameters:
-        - name: build
-          in: body
-          schema:
-            $ref: '#/definitions/buildSetup'
+        - name: branch
+          description: >-
+            If no branch is specified, it is treated as a production deploy
+            If a branch IS specified and matches the main branch, it is also production
+            If a branch is specified and doesn't match the main branch, it is a branch deploy
           required: false
+          in: query
+          type: string
+        - name: clear_cache
+          description: Whether to clear the build cache before building
+          required: false
+          in: query
+          type: boolean
+        - name: image
+          description: The build image tag to use for the build
+          required: false
+          in: query
+          type: string
+        - name: template_id
+          description: The build template to use for the build
+          required: false
+          in: query
+          type: string
+        - name: title
+          description: The title of the build
+          required: false
+          in: query
+          type: string
+        - name: zip
+          description: |
+            A zip file containing the site files to build.
+            Only used with Content-Type 'multipart/form-data'.
+            Alternatively, set Content-Type to 'application/zip' and send the zip as the raw request body (no 'zip' parameter needed).
+          required: false
+          in: formData
+          type: file
       responses:
         '200':
           description: OK
           schema:
             $ref: '#/definitions/build'
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '422':
+          description: Unprocessable Entity
         default:
           $ref: '#/responses/error'
   /sites/{site_id}/deployed-branches:
@@ -1263,6 +1336,51 @@ paths:
             $ref: '#/definitions/site'
         '404':
           description: Site not found
+  /sites/{site_id}/enable:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    put:
+      operationId: enableSite
+      tags: [site]
+      description: >-
+        Re-enables a site that was previously disabled by the user.
+        Sites that were disabled for usage exceeded or marked as spam
+        cannot be re-enabled via this endpoint.
+      responses:
+        '204':
+          description: No content
+        '422':
+          description: Cannot enable this site
+          schema:
+            $ref: '#/definitions/error'
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/disable:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    put:
+      operationId: disableSite
+      tags: [site]
+      description: >-
+        Disables a site, preventing it from serving content.
+        The site can be re-enabled later using the enable endpoint.
+      parameters:
+        - name: reason
+          type: string
+          in: query
+          required: true
+          description: Reason for disabling the site
+      responses:
+        '204':
+          description: No content
+        default:
+          $ref: '#/responses/error'
   /builds/{build_id}:
     parameters:
       - name: build_id
@@ -1309,6 +1427,10 @@ paths:
         in: query
         required: false
       - name: build_version
+        type: string
+        in: query
+        required: false
+      - name: task_id
         type: string
         in: query
         required: false
@@ -1411,6 +1533,34 @@ paths:
           description: No content
         default:
           $ref: '#/responses/error'
+  /deploys/{deploy_id}/validations_report:
+    patch:
+      operationId: updateDeployValidations
+      tags: [deploy]
+      description: Updates the deploy validations report for a deploy.
+      x-internal: true
+      x-controller: api/v1/deploys
+      x-action: validations_report
+      parameters:
+        - name: deploy_id
+          description: The ID of the deploy
+          type: string
+          in: path
+          required: true
+        - name: report
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              secrets_scan:
+                type: object
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DeployValidationsReport'
+
   /deploys/{deploy_id}/lock:
     post:
       operationId: lockDeploy
@@ -1513,6 +1663,66 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/function'
+        default:
+          $ref: '#/responses/error'
+  /deploys/{deploy_id}/server/{code_sha}:
+    put:
+      operationId: uploadDeployServer
+      tags: [deploy]
+      consumes:
+        - application/octet-stream
+      description: |
+        Uploads the deploy's Netlify Server bundle, addressed by the digest the deploy
+        declared in its `server` property.
+      parameters:
+        - name: deploy_id
+          type: string
+          in: path
+          required: true
+        - name: code_sha
+          type: string
+          in: path
+          required: true
+        - name: size
+          type: integer
+          in: query
+        - name: file_body
+          in: body
+          schema:
+            type: string
+            format: binary
+          required: true
+        - $ref: '#/parameters/retryCount'
+      responses:
+        '200':
+          description: OK
+        default:
+          $ref: '#/responses/error'
+  /deploys/{deploy_id}/edge_functions/{code_sha}:
+    put:
+      operationId: uploadDeployEdgeFunction
+      tags: [edgeFunction]
+      consumes:
+        - application/octet-stream
+      parameters:
+        - name: deploy_id
+          type: string
+          in: path
+          required: true
+        - name: code_sha
+          type: string
+          in: path
+          required: true
+        - name: file_body
+          in: body
+          schema:
+            type: string
+            format: binary
+          required: true
+        - $ref: '#/parameters/retryCount'
+      responses:
+        '200':
+          description: OK
         default:
           $ref: '#/responses/error'
   /sites/{site_id}/plugins/{package}:
@@ -1728,11 +1938,26 @@ paths:
           type: string
           in: query
           required: true
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
       responses:
         '201':
-          description: ok
+          description: Created
           schema:
             $ref: '#/definitions/ticket'
+        '401':
+          description: OAuth application not found
+          schema:
+            $ref: '#/definitions/error'
+        '422':
+          description: Validation error
+          schema:
+            $ref: '#/definitions/error'
         default:
           $ref: '#/responses/error'
   /oauth/tickets/{ticket_id}:
@@ -2026,9 +2251,7 @@ paths:
         '200':
           description: OK
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/accountMembership'
+            $ref: '#/definitions/accountMembership'
         default:
           $ref: '#/responses/error'
     put:
@@ -2081,6 +2304,332 @@ paths:
               $ref: '#/definitions/auditLog'
         default:
           $ref: '#/responses/error'
+
+  # begin agent_runners
+  /agent_runners:
+    get:
+      operationId: listAgentRunners
+      tags: [agentRunner]
+      parameters:
+        - name: account_id
+          type: string
+          in: query
+          required: true
+        - name: site_id
+          type: string
+          in: query
+          required: true
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/perPage'
+        - name: state
+          type: string
+          in: query
+          enum: ['live', 'error']
+        - name: title
+          type: string
+          in: query
+        - name: branch
+          type: string
+          in: query
+        - name: result_branch
+          type: string
+          in: query
+        - name: from
+          type: integer
+          in: query
+        - name: to
+          type: integer
+          in: query
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/agentRunner'
+        default:
+          $ref: '#/responses/error'
+    post:
+      operationId: createAgentRunner
+      tags: [agentRunner]
+      parameters:
+        - name: site_id
+          type: string
+          in: query
+          required: true
+        - name: deploy_id
+          type: string
+          in: query
+        - name: branch
+          type: string
+          in: query
+        - name: prompt
+          type: string
+          in: query
+        - name: agent
+          type: string
+          in: query
+        - name: model
+          type: string
+          in: query
+        - name: parent_agent_runner_id
+          type: string
+          in: query
+        - name: dev_server_image
+          type: string
+          in: query
+        - name: file_keys
+          type: array
+          in: query
+          items:
+            type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/agentRunner'
+        '404':
+          description: Not Found
+        '422':
+          description: Unprocessable Entity
+        default:
+          $ref: '#/responses/error'
+  /agent_runners/upload_url:
+    post:
+      x-internal: true
+      operationId: createAgentRunnerUploadUrl
+      tags: [agentRunner]
+      parameters:
+        - name: account_id
+          type: string
+          in: query
+          required: true
+        - name: filename
+          type: string
+          in: query
+          required: true
+        - name: content_type
+          type: string
+          in: query
+          required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '422':
+          description: Unprocessable Entity
+        default:
+          $ref: '#/responses/error'
+  /agent_runners/{agent_runner_id}:
+    parameters:
+      - name: agent_runner_id
+        type: string
+        in: path
+        required: true
+    get:
+      operationId: getAgentRunner
+      tags: [agentRunner]
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/agentRunner'
+        default:
+          $ref: '#/responses/error'
+    patch:
+      operationId: updateAgentRunner
+      tags: [agentRunner]
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/agentRunner'
+        default:
+          $ref: '#/responses/error'
+    delete:
+      operationId: deleteAgentRunner
+      tags: [agentRunner]
+      responses:
+        '202':
+          description: Accepted
+        default:
+          $ref: '#/responses/error'
+  /agent_runners/{agent_runner_id}/archive:
+    parameters:
+      - name: agent_runner_id
+        type: string
+        in: path
+        required: true
+    post:
+      operationId: archiveAgentRunner
+      tags: [agentRunner]
+      responses:
+        '202':
+          description: Accepted
+        '404':
+          description: Not Found
+        '422':
+          description: Unprocessable Entity
+        default:
+          $ref: '#/responses/error'
+  /agent_runners/{agent_runner_id}/pull_request:
+    parameters:
+      - name: agent_runner_id
+        type: string
+        in: path
+        required: true
+    post:
+      x-internal: true
+      operationId: agentRunnerPullRequest
+      tags: [agentRunner]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '409':
+          description: Conflict
+        '422':
+          description: Unprocessable Entity
+        default:
+          $ref: '#/responses/error'
+  /agent_runners/{agent_runner_id}/commit:
+    parameters:
+      - name: agent_runner_id
+        type: string
+        in: path
+        required: true
+    post:
+      x-internal: true
+      operationId: agentRunnerCommitToBranch
+      tags: [agentRunner]
+      parameters:
+        - name: target_branch
+          type: string
+          in: query
+          required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '409':
+          description: Conflict
+        '422':
+          description: Unprocessable Entity
+        default:
+          $ref: '#/responses/error'
+  # end agent_runners
+
+  # begin agent_runner_sessions
+  /agent_runners/{agent_runner_id}/sessions:
+    parameters:
+      - name: agent_runner_id
+        type: string
+        in: path
+        required: true
+    get:
+      operationId: listAgentRunnerSessions
+      tags: [agentRunnerSession]
+      parameters:
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/perPage'
+        - name: state
+          type: string
+          in: query
+          enum: ['live', 'error']
+        - name: from
+          type: integer
+          in: query
+        - name: to
+          type: integer
+          in: query
+        - name: order_by
+          type: string
+          in: query
+          enum: ['asc', 'desc']
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/agentRunnerSession'
+        default:
+          $ref: '#/responses/error'
+    post:
+      operationId: createAgentRunnerSession
+      tags: [agentRunnerSession]
+      parameters:
+        - name: prompt
+          type: string
+          in: query
+        - name: agent
+          type: string
+          in: query
+        - name: model
+          type: string
+          in: query
+        - name: file_keys
+          type: array
+          in: query
+          items:
+            type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/agentRunnerSession'
+        '404':
+          description: Not Found
+        '422':
+          description: Unprocessable Entity
+        default:
+          $ref: '#/responses/error'
+  /agent_runners/{agent_runner_id}/sessions/{agent_runner_session_id}:
+    parameters:
+      - name: agent_runner_id
+        type: string
+        in: path
+        required: true
+      - name: agent_runner_session_id
+        type: string
+        in: path
+        required: true
+    get:
+      operationId: getAgentRunnerSession
+      tags: [agentRunnerSession]
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/agentRunnerSession'
+        default:
+          $ref: '#/responses/error'
+    patch:
+      operationId: updateAgentRunnerSession
+      tags: [agentRunnerSession]
+      parameters:
+        - name: is_published
+          type: boolean
+          in: query
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/agentRunnerSession'
+        default:
+          $ref: '#/responses/error'
+    delete:
+      operationId: deleteAgentRunnerSession
+      tags: [agentRunnerSession]
+      responses:
+        '202':
+          description: Accepted
+        default:
+          $ref: '#/responses/error'
+  # end agent_runner_sessions
 
   # begin submission
   /submissions/{submission_id}:
@@ -2646,6 +3195,48 @@ paths:
         '200':
           description: OK
   # end sites/{site_id}/dev_servers/{dev_server_id}/activity
+  # begin sites/{site_id}/dev_servers/{dev_server_id}/state
+  /sites/{site_id}/dev_servers/{dev_server_id}/state:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+      - name: dev_server_id
+        type: string
+        in: path
+        required: true
+    post:
+      operationId: updateDevServerState
+      tags: [devServer]
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - state
+            properties:
+              state:
+                type: string
+                enum:
+                  - starting
+                  - live
+                  - error
+                  - done
+              task_id:
+                type: string
+              error:
+                type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/devServer'
+        '409':
+          description: Conflict
+  # end sites/{site_id}/dev_servers/{dev_server_id}/state
   /sites/{site_id}/dev_server_hooks:
     parameters:
       - name: site_id
@@ -2726,7 +3317,986 @@ paths:
           description: No content
         default:
           $ref: '#/responses/error'
+  # begin agent_runner_hooks
+  /sites/{site_id}/agent_runner_hooks:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    get:
+      x-internal: true
+      operationId: listSiteAgentRunnerHooks
+      tags: [agentRunnerHook]
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/agentRunnerHook'
+        default:
+          $ref: '#/responses/error'
+    post:
+      x-internal: true
+      operationId: createSiteAgentRunnerHook
+      tags: [agentRunnerHook]
+      consumes:
+        - application/json
+      parameters:
+        - name: agentRunnerHook
+          in: body
+          schema:
+            $ref: '#/definitions/agentRunnerHookSetup'
+          required: true
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/agentRunnerHookCreated'
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/agent_runner_hooks/{id}:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+      - name: id
+        type: string
+        in: path
+        required: true
+    get:
+      x-internal: true
+      operationId: getSiteAgentRunnerHook
+      tags: [agentRunnerHook]
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/agentRunnerHook'
+        default:
+          $ref: '#/responses/error'
+    put:
+      x-internal: true
+      operationId: updateSiteAgentRunnerHook
+      tags: [agentRunnerHook]
+      consumes:
+        - application/json
+      parameters:
+        - name: agentRunnerHook
+          in: body
+          schema:
+            $ref: '#/definitions/agentRunnerHookSetup'
+          required: true
+      responses:
+        '204':
+          description: No content
+        default:
+          $ref: '#/responses/error'
+    delete:
+      x-internal: true
+      operationId: deleteSiteAgentRunnerHook
+      tags: [agentRunnerHook]
+      responses:
+        '204':
+          description: No content
+        default:
+          $ref: '#/responses/error'
+  # end agent_runner_hooks
+  /ai-gateway/providers:
+    get:
+      operationId: getAIGatewayProviders
+      tags: [aiGateway]
+      security: []
+      responses:
+        '200':
+          description: The mapping of providers and supported models
+          schema:
+            type: object
+            properties:
+              providers:
+                additionalProperties:
+                  type: object
+                  $ref: '#/definitions/providerDefinition'
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/ai-gateway/token:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+        description: The site ID
+    get:
+      operationId: getAIGatewayToken
+      tags: [aiGateway]
+      responses:
+        '200':
+          description: AI Gateway token for the site
+          schema:
+            $ref: '#/definitions/aiGatewayToken'
+        '404':
+          description: AI Gateway not available for this site
+        default:
+          $ref: '#/responses/error'
+      description: Returns an AI Gateway token for a specific site
+  /accounts/{account_id}/ai-gateway/token:
+    parameters:
+      - name: account_id
+        type: string
+        in: path
+        required: true
+        description: The account ID
+    get:
+      operationId: getAccountAIGatewayToken
+      tags: [aiGateway]
+      responses:
+        '200':
+          description: AI Gateway token for the account
+          schema:
+            $ref: '#/definitions/aiGatewayToken'
+        '404':
+          description: AI Gateway not available for this account
+        default:
+          $ref: '#/responses/error'
+      description: Returns an AI Gateway token scoped to an account
+
+  # Database endpoints
+  /sites/{site_id}/database:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    post:
+      operationId: createSiteDatabase
+      tags: [database]
+      description: >-
+        Creates a new database for the specified site. If a database already exists,
+        returns the existing connection string. The database region defaults to the
+        site's functions region if not specified.
+      consumes:
+        - application/json
+      parameters:
+        - name: database
+          in: body
+          schema:
+            $ref: '#/definitions/createDatabaseRequest'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/databaseResponse'
+        '200':
+          description: Database already exists
+          schema:
+            $ref: '#/definitions/databaseResponse'
+        default:
+          $ref: '#/responses/error'
+    get:
+      operationId: getSiteDatabase
+      tags: [database]
+      description: Returns the database connection string for the specified site.
+      parameters:
+        - name: role
+          type: string
+          in: query
+          description: >-
+            The database role to use for the connection string.
+            Defaults to netlifydb_owner if not specified.
+          enum:
+            - netlifydb_owner
+            - netlifydb_readonly
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseResponse'
+        default:
+          $ref: '#/responses/error'
+    delete:
+      operationId: deleteSiteDatabase
+      tags: [database]
+      description: Deletes the database and all associated branches and snapshots for the specified site.
+      responses:
+        '204':
+          description: Deleted
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/branch:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    post:
+      operationId: createSiteDatabaseBranch
+      tags: [database]
+      description: >-
+        Creates a new database branch. If a branch already exists
+        for the specified branch ID, returns the existing connection string.
+      consumes:
+        - application/json
+      parameters:
+        - name: branch
+          in: body
+          schema:
+            $ref: '#/definitions/createDatabaseBranchRequest'
+          required: true
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/databaseBranchResponse'
+        '200':
+          description: Branch already exists
+          schema:
+            $ref: '#/definitions/databaseBranchResponse'
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/branches:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    get:
+      operationId: listSiteDatabaseBranches
+      tags: [database]
+      description: Returns all branches for the site's database with compute status and metadata.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseBranchesResponse'
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/branch/{branch_id}:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+      - name: branch_id
+        type: string
+        in: path
+        required: true
+        description: The branch ID
+    get:
+      operationId: getSiteDatabaseBranch
+      tags: [database]
+      description: Returns the database branch connection string for a specific branch.
+      parameters:
+        - name: role
+          type: string
+          in: query
+          description: >-
+            The database role to use for the connection string.
+            Defaults to netlifydb_owner if not specified.
+          enum:
+            - netlifydb_owner
+            - netlifydb_readonly
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseBranchResponse'
+        '404':
+          description: Branch not found
+        default:
+          $ref: '#/responses/error'
+    delete:
+      operationId: deleteSiteDatabaseBranch
+      tags: [database]
+      description: Deletes a database branch.
+      responses:
+        '204':
+          description: Deleted
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/branch/{branch_id}/reset:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+      - name: branch_id
+        type: string
+        in: path
+        required: true
+        description: The branch ID to reset
+    post:
+      operationId: resetSiteDatabaseBranch
+      tags: [database]
+      description: >-
+        Resets a non-production database branch by re-forking it from a source branch
+        (defaults to the production branch). If the target branch is already in sync
+        with the source, returns the existing connection string without performing a
+        reset, unless `force=true` is passed. The production branch cannot be reset.
+      consumes:
+        - application/json
+      parameters:
+        - name: force
+          type: boolean
+          in: query
+          description: >-
+            If true, resets the branch even when it is already in sync with the source.
+        - name: role
+          type: string
+          in: query
+          description: >-
+            The database role to use for the returned connection string.
+            Defaults to netlifydb_owner if not specified.
+          enum:
+            - netlifydb_owner
+            - netlifydb_readonly
+        - name: reset
+          in: body
+          schema:
+            $ref: '#/definitions/resetDatabaseBranchRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/resetDatabaseBranchResponse'
+        '400':
+          description: >-
+            Invalid request — for example, the target is the production branch
+            or the source branch is the same as the target.
+        '404':
+          description: Database or branch not found
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/branch/{branch_id}/compute/settings:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+      - name: branch_id
+        type: string
+        in: path
+        required: true
+        description: The branch ID
+    put:
+      operationId: setSiteDatabaseBranchComputeSettings
+      tags: [database]
+      description: >-
+        Sets compute settings for a specific database branch, overriding project-level settings.
+        Requires a Pro or higher plan.
+      consumes:
+        - application/json
+      parameters:
+        - name: computeSettings
+          in: body
+          schema:
+            $ref: '#/definitions/databaseComputeSettingsRequest'
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseComputeSettings'
+        '403':
+          description: Compute customization requires a Pro or higher plan
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/compute/settings:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    put:
+      operationId: setSiteDatabaseComputeSettings
+      tags: [database]
+      description: >-
+        Sets project-level compute settings for the database.
+        Applied to new branches. Can be overridden per-branch.
+        Requires a Pro or higher plan.
+      consumes:
+        - application/json
+      parameters:
+        - name: computeSettings
+          in: body
+          schema:
+            $ref: '#/definitions/databaseComputeSettingsRequest'
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseComputeSettings'
+        '403':
+          description: Compute customization requires a Pro or higher plan
+        default:
+          $ref: '#/responses/error'
+    get:
+      operationId: getSiteDatabaseComputeSettings
+      tags: [database]
+      description: >-
+        Returns the project-level compute settings for the database.
+        Returns effective settings (custom or tier defaults).
+        Requires a Pro or higher plan.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseComputeSettings'
+        '403':
+          description: Compute customization requires a Pro or higher plan
+        default:
+          $ref: '#/responses/error'
+    delete:
+      operationId: clearSiteDatabaseComputeSettings
+      tags: [database]
+      description: >-
+        Resets project-level compute settings to tier defaults.
+        Requires a Pro or higher plan.
+      responses:
+        '204':
+          description: Cleared
+        '403':
+          description: Compute customization requires a Pro or higher plan
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/migrations:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    get:
+      operationId: listSiteDatabaseMigrations
+      tags: [database]
+      description: >-
+        Returns the list of migrations available for the specified branch,
+        indicating which ones have been applied to the database.
+      parameters:
+        - name: branch
+          type: string
+          in: query
+          description: >-
+            The branch ID to list migrations for.
+            Defaults to "production" if not specified.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/listDatabaseMigrationsResponse'
+        '404':
+          description: Database or branch not found
+        '423':
+          description: Database is disabled
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/migrations/{name}:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+      - name: name
+        type: string
+        in: path
+        required: true
+        description: The migration name
+    get:
+      operationId: getSiteDatabaseMigration
+      tags: [database]
+      description: >-
+        Returns the contents of a named migration for the specified branch.
+      parameters:
+        - name: branch
+          type: string
+          in: query
+          description: >-
+            The branch ID to look up the migration on.
+            Defaults to the currently published deploy's branch.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseMigrationDetail'
+        '404':
+          description: Migration, database, or branch not found
+        '423':
+          description: Database is disabled
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/migrations/{deploy_id}:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+      - name: deploy_id
+        type: string
+        in: path
+        required: true
+        description: The deploy ID to run migrations for
+    post:
+      operationId: runSiteDatabaseMigrations
+      tags: [database]
+      description: >-
+        Runs database migrations for the specified deploy.
+        Finds the deploy and determines the appropriate branch.
+      consumes:
+        - application/json
+      parameters:
+        - name: migrations
+          in: body
+          schema:
+            $ref: '#/definitions/runDatabaseMigrationsRequest'
+      responses:
+        '200':
+          description: OK
+        '409':
+          description: Migration conflict - migration modified or removed after being applied
+        '422':
+          description: Migration validation failed
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/snapshot:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    post:
+      operationId: createSiteDatabaseSnapshot
+      tags: [database]
+      description: >-
+        Creates a point-in-time snapshot of a database branch.
+        Defaults to the production branch if no branch name is specified.
+      consumes:
+        - application/json
+      parameters:
+        - name: snapshot
+          in: body
+          schema:
+            $ref: '#/definitions/createDatabaseSnapshotRequest'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/databaseSnapshot'
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/snapshots:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+    get:
+      operationId: listSiteDatabaseSnapshots
+      tags: [database]
+      description: Returns all snapshots for the site's database.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/databaseSnapshotsResponse'
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/snapshot/{snapshot_id}:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+      - name: snapshot_id
+        type: string
+        in: path
+        required: true
+        description: The snapshot ID
+    delete:
+      operationId: deleteSiteDatabaseSnapshot
+      tags: [database]
+      description: Deletes a database snapshot.
+      responses:
+        '204':
+          description: Deleted
+        default:
+          $ref: '#/responses/error'
+  /sites/{site_id}/database/snapshot/{snapshot_id}/restore:
+    parameters:
+      - name: site_id
+        type: string
+        in: path
+        required: true
+      - name: snapshot_id
+        type: string
+        in: path
+        required: true
+        description: The snapshot ID to restore
+    post:
+      operationId: restoreSiteDatabaseSnapshot
+      tags: [database]
+      description: >-
+        Restores a snapshot to a database branch.
+        Defaults to the production branch if no branch_name is specified.
+      consumes:
+        - application/json
+      parameters:
+        - name: restore
+          in: body
+          schema:
+            $ref: '#/definitions/restoreDatabaseSnapshotRequest'
+      responses:
+        '200':
+          description: OK
+        default:
+          $ref: '#/responses/error'
+
 definitions:
+  # Database definitions
+  createDatabaseRequest:
+    type: object
+    description: Request body for creating a database
+    properties:
+      region:
+        type: string
+        description: >-
+          The region where the database should be created.
+          Defaults to the site's functions region if not specified.
+  databaseResponse:
+    type: object
+    description: Response containing the database connection string
+    properties:
+      connection_string:
+        type: string
+        description: The connection string for the database
+  createDatabaseBranchRequest:
+    type: object
+    description: Request body for creating a database branch
+    required:
+      - branch_id
+    properties:
+      parent_branch_id:
+        type: string
+        description: >-
+          The ID of the parent branch to create the new branch from.
+          Defaults to the production branch if not specified.
+      branch_id:
+        type: string
+        description: The branch identifier
+      metadata:
+        type: object
+        description: Arbitrary metadata to associate with the branch
+        additionalProperties: true
+  databaseBranchResponse:
+    type: object
+    description: Response containing the database branch connection string
+    properties:
+      connection_string:
+        type: string
+        description: The connection string for the database branch
+      metadata:
+        type: object
+        description: Metadata associated with the branch
+        additionalProperties: true
+  databaseBranchesResponse:
+    type: object
+    description: Response containing a list of database branches
+    properties:
+      branches:
+        type: array
+        items:
+          $ref: '#/definitions/databaseBranchDetail'
+        description: List of database branches
+  databaseBranchDetail:
+    type: object
+    description: Detailed information about a database branch
+    properties:
+      branch_id:
+        type: string
+        description: The branch identifier
+      name:
+        type: string
+        description: The branch name
+      connection_string:
+        type: string
+        description: The connection string for the branch
+      state:
+        type: string
+        description: The current state of the branch
+        enum:
+          - init
+          - creating
+          - resetting
+          - ready
+          - archived
+      logical_size_bytes:
+        type: integer
+        format: int64
+        description: The logical size of the branch in bytes
+      created_at:
+        type: string
+        format: dateTime
+        description: When the branch was created
+      updated_at:
+        type: string
+        format: dateTime
+        description: When the branch was last updated
+      last_active_at:
+        type: string
+        format: dateTime
+        description: When the branch was last active
+      compute:
+        $ref: '#/definitions/databaseBranchCompute'
+      metadata:
+        type: object
+        description: Metadata associated with the branch
+        additionalProperties: true
+  databaseBranchCompute:
+    type: object
+    description: Compute endpoint status for a branch
+    properties:
+      current_state:
+        type: string
+        description: The current state of the compute endpoint
+        enum:
+          - active
+          - idle
+      autoscaling_limit_min_cu:
+        type: number
+        format: double
+        description: Minimum compute units for autoscaling
+      autoscaling_limit_max_cu:
+        type: number
+        format: double
+        description: Maximum compute units for autoscaling
+      suspend_timeout_seconds:
+        type: integer
+        format: int64
+        description: Seconds of inactivity before the compute endpoint is suspended
+      last_active:
+        type: string
+        format: dateTime
+        description: When the compute endpoint was last active
+  createDatabaseSnapshotRequest:
+    type: object
+    description: Request body for creating a database snapshot
+    properties:
+      branch_id:
+        type: string
+        description: >-
+          The ID of the branch to snapshot.
+          Defaults to "production" if not specified.
+      name:
+        type: string
+        description: A name for the snapshot
+      metadata:
+        $ref: '#/definitions/databaseSnapshotMetadata'
+  databaseSnapshot:
+    type: object
+    description: A point-in-time snapshot of a database branch
+    properties:
+      id:
+        type: string
+        description: The unique identifier of the snapshot
+      source_branch_id:
+        type: string
+        description: The ID of the branch that was snapshotted
+      manual:
+        type: boolean
+        description: Whether this snapshot was manually created
+      created_at:
+        type: string
+        format: dateTime
+        description: When the snapshot was created
+      expires_at:
+        type: string
+        format: dateTime
+        description: When the snapshot expires
+      timestamp:
+        type: string
+        format: dateTime
+        description: The point-in-time timestamp of the snapshot
+      metadata:
+        $ref: '#/definitions/databaseSnapshotMetadata'
+  databaseSnapshotMetadata:
+    type: object
+    description: Metadata associated with a snapshot
+    properties:
+      deploy:
+        type: object
+        description: Deploy information associated with the snapshot
+        additionalProperties: true
+      source:
+        type: string
+        description: The source that created the snapshot
+  databaseSnapshotsResponse:
+    type: object
+    description: Response containing a list of database snapshots
+    properties:
+      snapshots:
+        type: array
+        items:
+          $ref: '#/definitions/databaseSnapshot'
+        description: List of database snapshots
+  restoreDatabaseSnapshotRequest:
+    type: object
+    description: Request body for restoring a database snapshot
+    properties:
+      branch_id:
+        type: string
+        description: >-
+          The ID of the branch to restore the snapshot to.
+          Defaults to "production" if not specified.
+  databaseComputeSettingsRequest:
+    type: object
+    description: >-
+      Request body for setting compute settings.
+      All fields are optional; only provided fields are updated.
+    properties:
+      min_cu:
+        type: number
+        format: double
+        minimum: 0.25
+        maximum: 16
+        x-nullable: true
+        description: >-
+          Minimum compute units (0.25 to 16.0).
+          Must be less than or equal to max_cu.
+      max_cu:
+        type: number
+        format: double
+        minimum: 0.25
+        maximum: 16
+        x-nullable: true
+        description: >-
+          Maximum compute units (0.25 to 16.0).
+          Must be greater than or equal to min_cu.
+          max_cu - min_cu must not exceed 8.0.
+      sleep_timeout_seconds:
+        type: integer
+        format: int64
+        minimum: -1
+        x-nullable: true
+        description: >-
+          Seconds of inactivity before the compute endpoint is suspended.
+          Use -1 for always on, or a non-negative value.
+  databaseComputeSettings:
+    type: object
+    description: Compute settings for a database or branch
+    properties:
+      min_cu:
+        type: number
+        format: double
+        description: Minimum compute units
+      max_cu:
+        type: number
+        format: double
+        description: Maximum compute units
+      sleep_timeout_seconds:
+        type: integer
+        format: int64
+        description: Seconds of inactivity before suspension
+  runDatabaseMigrationsRequest:
+    type: object
+    description: Request body for running database migrations
+    properties:
+      dry_run:
+        type: boolean
+        description: >-
+          If true, validates migrations without applying them.
+  resetDatabaseBranchRequest:
+    type: object
+    description: Request body for resetting a database branch
+    properties:
+      source_branch_id:
+        type: string
+        description: >-
+          The ID of the branch to re-fork the target branch from.
+          Defaults to "production" if not specified.
+  resetDatabaseBranchResponse:
+    type: object
+    description: Response for a database branch reset
+    properties:
+      reset:
+        type: boolean
+        description: >-
+          Whether the branch was actually re-forked. False when the target was
+          already in sync with the source and `force=true` was not set.
+      connection_string:
+        type: string
+        description: The connection string for the reset (or unchanged) branch
+      metadata:
+        type: object
+        description: Metadata associated with the branch
+        additionalProperties: true
+  listDatabaseMigrationsResponse:
+    type: object
+    description: Response containing the list of migrations for a branch
+    properties:
+      migrations:
+        type: array
+        items:
+          $ref: '#/definitions/databaseMigration'
+        description: List of migrations
+  databaseMigration:
+    type: object
+    description: A migration available to a database branch
+    properties:
+      version:
+        type: integer
+        format: int64
+        description: The migration version number
+      name:
+        type: string
+        description: The migration name
+      path:
+        type: string
+        description: The path to the migration file in the deploy bundle
+      applied:
+        type: boolean
+        description: Whether this migration has been applied to the branch
+  databaseMigrationDetail:
+    type: object
+    description: A migration with its file contents
+    properties:
+      version:
+        type: integer
+        format: int64
+        description: The migration version number
+      name:
+        type: string
+        description: The migration name
+      path:
+        type: string
+        description: The path to the migration file in the deploy bundle
+      content:
+        type: string
+        description: The raw contents of the migration file
+
+  DeployValidationsReport:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The id of the deploy validations report
+      deploy_id:
+        type: string
+        description: The id of the deploy
+      secret_scan_result:
+        $ref: '#/definitions/DeployValidationsReport_SecretScanResult'
+
+  DeployValidationsReport_SecretScanResult:
+    type: object
+    properties:
+      scannedFilesCount:
+        type: integer
+        description: The number of files scanned
+      secretsScanMatches:
+        type: array
+        items:
+          type: string
+        description: The list of secrets scan matches
+
   splitTestSetup:
     type: object
     properties:
@@ -2921,6 +4491,9 @@ definitions:
         type: string
       functions_region:
         type: string
+      prevent_non_git_prod_deploys:
+        type: boolean
+        default: false
   siteSetup:
     allOf:
       - $ref: '#/definitions/site'
@@ -2944,8 +4517,10 @@ definitions:
         type: string
       functions_dir:
         type: string
+        description: The directory where Netlify can find your compiled functions to deploy them. Defaults to netlify/functions if not set. You can also define and override this setting in your project’s netlify.toml file.
       cmd:
         type: string
+        description: The build command to run. This is the command that Netlify runs to build your site. If a site has a netlify.toml file with a build command it will override this value.
       allowed_branches:
         type: array
         items:
@@ -2964,6 +4539,7 @@ definitions:
         type: integer
       stop_builds:
         type: boolean
+        description: When true, Netlify will not build your project automatically. You can build locally via the CLI and then publish new deploys manually via the CLI or the API.
   submission:
     type: object
     properties:
@@ -3046,6 +4622,7 @@ definitions:
         enum:
           - all
           - dev
+          - dev-server
           - branch-deploy
           - deploy-preview
           - production
@@ -3156,6 +4733,8 @@ definitions:
         type: string
       sha:
         type: string
+      region:
+        type: string
   snippet:
     type: object
     properties:
@@ -3224,6 +4803,21 @@ definitions:
         type: array
         items:
           type: string
+      required_edge_functions:
+        type: array
+        items:
+          type: string
+        description: |
+          An array of code_shas for the edge-function bundles that need to be uploaded to
+          complete the deploy.
+      required_server:
+        type: array
+        items:
+          type: string
+        description: |
+          The SHA256 digest of the deploy's Netlify Server bundle, when it still needs to
+          be uploaded to complete the deploy. A deploy has at most one server, so this
+          holds either nothing or a single digest.
       error_message:
         type: string
       branch:
@@ -3253,21 +4847,97 @@ definitions:
         type: string
       framework:
         type: string
+      skew_protection_token:
+        type: string
       function_schedules:
         type: array
         items:
           $ref: '#/definitions/functionSchedule'
+      functions_region:
+        type: string
+        description: |
+          The functions region for this deploy as an airport code.
+      functions_region_overrides:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            region:
+              type: string
+        description: |
+          Functions in the deploy that explicitly specify their own region
+          (airport code).
+  deployEnvironmentVariable:
+    type: object
+    required:
+      - key
+      - value
+      - scopes
+      - is_secret
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+      is_secret:
+        type: boolean
+      scopes:
+        type: array
+        items:
+          type: string
+          enum:
+            - builds
+            - functions
+            - runtime
+            - post-processing
   deployFiles:
     type: object
+    description: |
+      Deploy files can be provided in two ways:
+      1. As a JSON object using 'files' (a hash mapping file paths to SHA1 digests), OR
+      2. As a zip file using one of these methods:
+         - Set Content-Type to 'application/zip' and send the zip file as the raw request body
+         - Include the zip file content in the 'zip' field of this JSON object with Content-Type 'application/json'
     properties:
       files:
         type: object
+        description: A hash mapping file paths to SHA1 digests of the file contents.
+      zip:
+        type: string
+        format: binary
+        description: |
+          A zip file containing the site files to deploy. Alternative to 'files'.
+          To use this field, set Content-Type to 'application/json' and include the zip content here.
+          Alternatively, you can set Content-Type to 'application/zip' and send the zip as the raw request body (not as JSON).
       draft:
         type: boolean
       async:
         type: boolean
       functions:
         type: object
+      edge_functions:
+        type: object
+        description: |
+          A hash mapping edge-function bundle formats to the code_sha of each bundle. The
+          response's required_edge_functions lists which of these still need to be uploaded.
+      server:
+        type: object
+        description: |
+          The deploy's Netlify Server. A deploy has at most one. The response's
+          required_server says whether it still needs to be uploaded.
+        required:
+          - sha
+        properties:
+          sha:
+            type: string
+            description: The SHA256 digest of the server bundle.
+          region:
+            type: string
+            description: |
+              Where the server runs. Defaults to the region configured at the site level
+              when absent.
       function_schedules:
         type: array
         items:
@@ -3283,6 +4953,27 @@ definitions:
         type: string
       framework_version:
         type: string
+      environment:
+        description: |
+          A list of deploy-specific environment variable data. Data specified this way applies only
+          to this specific deploy and is merged into any existing environment variables set on the
+          account and site.
+
+          Deploy-specific environment variable data takes precedence over account and site
+          environment variable data: For example, a deploy-specific variable with the key `NODE_ENV`
+          will take priority over any existing site- and account-level environment variable data
+          with the key `NODE_ENV`.
+
+          Environment variable data may be provided at one of two times:
+
+          - When creating a new Deploy with deploy files (most common)
+          - When finalizing an existing Deploy with deploy files
+
+          Once set, environment variables for a specific deploy cannot be modified. Subsequent
+          attempts to modify environment variable data for a deploy will be ignored.
+        type: array
+        items:
+          $ref: '#/definitions/deployEnvironmentVariable'
   pluginParams:
     type: object
     properties:
@@ -3793,6 +5484,187 @@ definitions:
             type: string
         additionalProperties:
           type: object
+  agentRunner:
+    type: object
+    properties:
+      id:
+        type: string
+      site_id:
+        type: string
+      parent_agent_runner_id:
+        type: string
+      state:
+        type: string
+      created_at:
+        type: string
+        format: dateTime
+      updated_at:
+        type: string
+        format: dateTime
+      done_at:
+        type: string
+        format: dateTime
+      title:
+        type: string
+      branch:
+        type: string
+      result_branch:
+        type: string
+      pr_url:
+        type: string
+      pr_branch:
+        type: string
+      pr_state:
+        type: string
+      pr_number:
+        type: integer
+      pr_is_being_created:
+        type: boolean
+      pr_error:
+        type: string
+      current_task:
+        type: string
+      result_diff:
+        type: string
+      sha:
+        type: string
+      merge_commit_sha:
+        type: string
+      merge_commit_error:
+        type: string
+      merge_commit_is_being_created:
+        type: boolean
+      base_deploy_id:
+        type: string
+      attached_file_keys:
+        type: array
+        items:
+          type: string
+      active_session_created_at:
+        type: string
+        format: dateTime
+      latest_session_deploy_id:
+        type: string
+      latest_session_deploy_url:
+        type: string
+      user:
+        $ref: '#/definitions/agentRunnerUser'
+  agentRunnerSession:
+    type: object
+    properties:
+      id:
+        type: string
+      agent_runner_id:
+        type: string
+      dev_server_id:
+        type: string
+      state:
+        type: string
+      created_at:
+        type: string
+        format: dateTime
+      updated_at:
+        type: string
+        format: dateTime
+      done_at:
+        type: string
+        format: dateTime
+      title:
+        type: string
+      prompt:
+        type: string
+      agent_config:
+        $ref: '#/definitions/agentRunnerSessionConfig'
+      result:
+        type: string
+      result_diff:
+        type: string
+      commit_sha:
+        type: string
+      deploy_id:
+        type: string
+      deploy_url:
+        type: string
+      duration:
+        type: integer
+      steps:
+        type: array
+        items:
+          $ref: '#/definitions/agentRunnerSessionStep'
+      user:
+        $ref: '#/definitions/agentRunnerUser'
+      attached_file_keys:
+        type: array
+        items:
+          type: string
+      result_zip_file_name:
+        type: string
+      is_published:
+        type: boolean
+  agentRunnerSessionStep:
+    type: object
+    properties:
+      title:
+        type: string
+      message:
+        type: string
+  agentRunnerSessionConfig:
+    type: object
+    properties:
+      agent:
+        type: string
+      model:
+        type: string
+  agentRunnerUser:
+    type: object
+    properties:
+      id:
+        type: string
+      full_name:
+        type: string
+      email:
+        type: string
+      avatar_url:
+        type: string
+  agentRunnerHook:
+    type: object
+    properties:
+      id:
+        type: string
+      site_id:
+        type: string
+      title:
+        type: string
+      branch:
+        type: string
+      prompt:
+        type: string
+      agent:
+        type: string
+      url:
+        type: string
+      msg:
+        type: string
+      created_at:
+        type: string
+        format: dateTime
+  agentRunnerHookSetup:
+    type: object
+    properties:
+      title:
+        type: string
+      branch:
+        type: string
+      prompt:
+        type: string
+      agent:
+        type: string
+  agentRunnerHookCreated:
+    allOf:
+      - $ref: '#/definitions/agentRunnerHook'
+      - properties:
+          secret:
+            type: string
   accountUsageCapability:
     type: object
     properties:
@@ -3905,6 +5777,10 @@ definitions:
         type: string
       build_data:
         type: object
+      memory:
+        type: integer
+        description: |
+          The function's memory allocation in MB. Mutually exclusive with `vcpu`.
       routes:
         type: array
         items:
@@ -3915,8 +5791,20 @@ definitions:
           $ref: '#/definitions/excludedFunctionRoute'
       priority:
         type: integer
+      region:
+        type: string
       traffic_rules:
         $ref: '#/definitions/trafficRulesConfig'
+      vcpu:
+        type: number
+        format: float
+        description: |
+          Number of vCPUs to provision for the function. Allowed range is
+          0.5–2.
+      event_subscriptions:
+        type: array
+        items:
+          type: string
   functionRoute:
     type: object
     properties:
@@ -4064,6 +5952,31 @@ definitions:
         enum:
           - new_dev_server
           - content_refresh
+  providerDefinition:
+    type: object
+    properties:
+      token_env_var:
+        type: string
+      url_env_var:
+        type: string
+      models:
+        type: array
+        items:
+          type: string
+  aiGatewayToken:
+    type: object
+    properties:
+      token:
+        type: string
+        description: The AI Gateway authentication token
+      url:
+        type: string
+        description: AI gateway base url
+      expires_at:
+        type: integer
+        format: int64
+        description: Unix timestamp when the token expires
+
 parameters:
   page:
     type: integer
@@ -4131,6 +6044,9 @@ x-tagGroups:
   - name: Functions
     tags:
       - function
+  - name: Database
+    tags:
+      - database
   - name: Forms
     tags:
       - form
@@ -4211,3 +6127,5 @@ tags:
     x-displayName: Dev server
   - name: devServerHook
     x-displayName: Dev server hook
+  - name: database
+    x-displayName: Database
